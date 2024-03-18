@@ -1,0 +1,20 @@
+services:
+  mariadb:
+    build: ./mariadb
+    container_name: mariadb
+    volumes:
+      - /home/pducloux/data/mariadb
+    networks:
+      - inception
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    volumes:
+      - /home/pducloux/data/nginx
+    networks:
+      - inception
+
+networks:
+  inception:
+    driver: bridge
