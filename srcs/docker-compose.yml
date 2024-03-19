@@ -6,6 +6,10 @@ services:
       - /home/pducloux/data/mariadb
     networks:
       - inception
+    expose:
+      - "3306"
+    entrypoint: entrypoint.sh
+    command: mysqld
 
   nginx:
     build: ./nginx

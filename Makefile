@@ -7,4 +7,3 @@ clean:
 	docker compose -f ${COMPOSE_FILE} down
 	docker system prune -a
 	docker volume prune -a
-	docker image prune -a
