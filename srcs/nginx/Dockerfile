@@ -1,5 +1,10 @@
-FROM debian:bullseye
+FROM alpine:latest
 
-RUN apt-get update && apt-get upgrade
-RUN apt-get install -y \
-	nginx
+# Install dependencies
+RUN apk update && apk upgrade
+RUN apk add nginx
+
+# Copy the configuration file
+COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+COPY ./conf/entrypoint.sh /tmp/entrypoint.sh
+RUN chmod +x /tmp/entrypoint.sh

@@ -3,15 +3,13 @@
  mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql || mariadb-upgrade
  
  # create dir for daemon communication
- if [ ! -f '/run/mysql' ]; then
-	 mkdir /run/mysql
-	 chown -R mysql:mysql /run/mysql
-	 chmod -R 777 /run/mysql
- fi
+ mkdir -p /run/mysqld && \
+	 chown -R mysql:mysql /run/mysqld && \
+	 chmod 777 /run/mysqld
 
  #setup data dir
- chown -R mysql:mysql /val/lib/mysql
+ chown -R mysql:mysql /var/lib/mysql
  chmod -R 777 /var/lib/mysql
 
- mysqld
- exit 0
+ mysql -u mysql </tmp/database.sql
+ exec "$@"
