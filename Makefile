@@ -1,7 +1,7 @@
 COMPOSE_FILE = srcs/docker-compose.yml
 
 all:
-	docker compose --parallel 4 -f ${COMPOSE_FILE} up --build -d
+	docker compose --parallel 4 -f ${COMPOSE_FILE} up --build
 
 clean:
 	docker compose -f ${COMPOSE_FILE} down

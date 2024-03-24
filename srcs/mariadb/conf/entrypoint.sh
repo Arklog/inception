@@ -12,4 +12,5 @@
  chmod -R 777 /var/lib/mysql
 
  mysql -u mysql </tmp/database.sql
+
  exec "$@"

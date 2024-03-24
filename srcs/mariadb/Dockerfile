@@ -9,4 +9,6 @@ RUN apk add mariadb \
 COPY ./conf/entrypoint.sh /tmp/entrypoint.sh
 COPY ./conf/database.sql /tmp/database.sql
 
+RUN echo "${DATADIR}"
+
 RUN chmod +x /tmp/entrypoint.sh

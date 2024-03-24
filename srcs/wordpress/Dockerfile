@@ -3,7 +3,8 @@ FROM alpine:latest
 RUN apk update && apk upgrade
 RUN apk add 	wget \
 		unzip \
-		php-fpm
+		bash \
+		php-fpm findutils
 
 RUN wget https://wordpress.org/latest.zip && \
 	unzip latest.zip && \
@@ -12,5 +13,6 @@ RUN wget https://wordpress.org/latest.zip && \
 	mv wordpress /var/www/html
 
 COPY ./conf/entrypoint.sh /tmp/entrypoint.sh
+COPY ./conf/wp-config.php /var/www/html/wordpress/wp-config.php
 
 RUN chmod +x /tmp/entrypoint.sh
