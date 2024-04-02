@@ -1,14 +1,24 @@
 FROM alpine:latest
 
 # Install dependencies
-RUN apk update && apk upgrade
-RUN apk add mariadb \
-	mariadb-client \
-	bash
+RUN 	apk update && \
+	apk upgrade && \
+	apk add	mariadb \
+		mariadb-client \
+		bash \
+		mysql \
+		openrc
 
-COPY ./conf/entrypoint.sh /tmp/entrypoint.sh
-COPY ./conf/database.sql /tmp/database.sql
+# copy config files
+COPY 	./conf/entrypoint.sh /usr/sbin/entrypoint.sh
+RUN	chmod +x /usr/sbin/entrypoint.sh
+COPY	./conf/my.cnf /etc/my.cnf
+COPY	./conf/database.sql /tmp/database.sql
 
-RUN echo "${DATADIR}"
+# create mysqld folder
+RUN 	mkdir -p /var/run/mysqld && \
+	chown -R mysql:mysql /var/run/mysqld && \
+	chmod 777 -R /var/run/mysqld
 
-RUN chmod +x /tmp/entrypoint.sh
+# create openrc folder and file
+RUN	mkdir -p /run/openrc && touch /run/openrc/softlevel

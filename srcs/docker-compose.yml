@@ -3,46 +3,49 @@ services:
     build: ./mariadb
     container_name: mariadb
     restart: on-failure
+    env_file:
+      - .env
     volumes:
-      - mariadb:/var/lib/mysql
+      - ${DATADIR}/mariadb:/var/lib/mysql
     networks:
       - inception
-    expose:
-      - "3306"
     ports:
       - "3306:3306"
-    entrypoint: "/tmp/entrypoint.sh"
-    command: ["mysqld", "--bind-address=0.0.0.0", "--user=mysql"]
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["mysqld"]
 
   nginx:
     build: ./nginx
     container_name: nginx
+    hostname: ${WP_URL}
     restart: on-failure
+    env_file:
+      - .env
     depends_on:
       - wordpress
-    volumes:
-      - nginx:/etc/nginx
     networks:
       - inception
+    expose:
+      - "443"
+    ports:
+      - "443:443"
     entrypoint: "/tmp/entrypoint.sh"
-    command: ["nginx", "-g", "daemon off;"]
+    command: ["nginx-debug", "-g", "daemon off;"]
 
   wordpress:
     build: ./wordpress
     container_name: wordpress
     restart: on-failure
+    env_file:
+      - .env
     volumes:
-      - wordpress:/var/www/html
+      - ${DATADIR}/wordpress:/var/www/html/wordpress
     networks:
       - inception
     depends_on:
       - mariadb
-    expose:
-      - "80"
-      - "443"
     ports:
-      - "80:80"
-      - "443:443"
+      - "9000:9000"
     entrypoint: "/tmp/entrypoint.sh"
     command: ["/usr/sbin/php-fpm82", "-F"]
 
@@ -54,20 +57,6 @@ volumes:
   mariadb:
     driver: local
     driver_opts:
-        type: none
-        device: ${DATADIR}/mariadb
-        o: bind
-
-  nginx:
-    driver: local
-    driver_opts:
       type: none
-      device: ${DATADIR}/nginx
-      o: bind
-
-  wordpress:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${DATADIR}/wordpress
+      device: ${DATADIR}/mariadb
       o: bind

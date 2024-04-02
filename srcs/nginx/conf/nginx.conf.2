@@ -19,7 +19,7 @@ http {
 
 		ssl_certificate /etc/nginx/ssl/pducloux.42.fr.crt;
 		ssl_certificate_key /etc/nginx/ssl/pducloux.42.fr.key;
-		ssl_protocols TLSv1.3;
+		ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
 
 		index index.php;
 		root /var/www/html/wordpress;
@@ -28,36 +28,18 @@ http {
 			try_files $uri $uri/ /index.php?$args;
 		}
 
-		location ~ \.css {
-			add_header Content-Type text/css;
-			fastcgi_pass wordpress:9000;
-			fastcgi_index index.php;
-			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-			include fastcgi_params;
-		}
-
-		location ~ \.js {
-			add_header Content-Type application/javascript;
-			fastcgi_pass wordpress:9000;
-			fastcgi_index index.php;
-			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-			include fastcgi_params;
-		}
-
-		location ~ \.woff2 {
-			add_header Content-Type application/font-woff2;
-			fastcgi_pass wordpress:9000;
-			fastcgi_index index.php;
-			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-			include fastcgi_params;
-		}
-
 		location ~ \.php($|/) {
-			fastcgi_split_path_info ^(.+\.php)(/.+)$;
-			fastcgi_pass wordpress:9000;
-			fastcgi_index index.php;
-			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 			include fastcgi_params;
+			fastcgi_pass wordpress:9000;
+			fastcgi_intercept_errors on;
+			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		}
+
+		location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+			include mime.types;
+			fastcgi_pass wordpress:9000;
+			expires max;
+			log_not_found off;
 		}
 	}
 }
