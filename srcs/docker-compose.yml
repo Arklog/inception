@@ -9,8 +9,8 @@ services:
       - ${DATADIR}/mariadb:/var/lib/mysql
     networks:
       - inception
-    ports:
-      - "3306:3306"
+    expose:
+      - "3306"
     entrypoint: "/usr/sbin/entrypoint.sh"
     command: ["mysqld"]
 
@@ -21,19 +21,21 @@ services:
     restart: on-failure
     env_file:
       - .env
-    depends_on:
-      - wordpress
     networks:
       - inception
-    expose:
-      - "443"
     ports:
       - "443:443"
+    expose:
+      - "443"
     entrypoint: "/tmp/entrypoint.sh"
     command: ["nginx-debug", "-g", "daemon off;"]
 
   wordpress:
-    build: ./wordpress
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+      args:
+        - PHPVERSION=${PHPVERSION}
     container_name: wordpress
     restart: on-failure
     env_file:
@@ -42,21 +44,95 @@ services:
       - ${DATADIR}/wordpress:/var/www/html/wordpress
     networks:
       - inception
-    depends_on:
-      - mariadb
+    expose:
+      - "9000"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["/usr/sbin/php-fpm${PHPVERSION}", "-F"]
+
+  ftp:
+    build: ./ftp
+    container_name: ftp
+    restart: on-failure
+    env_file:
+      - .env
+    volumes:
+      - ${DATADIR}/wordpress:/var/www/html/wordpress
+    networks:
+      - inception
     ports:
-      - "9000:9000"
-    entrypoint: "/tmp/entrypoint.sh"
-    command: ["/usr/sbin/php-fpm82", "-F"]
+      - "20:20"
+      - "21:21"
+      - "990:990"
+      - "21000-21010:21000-21010"
+    expose:
+      - "20"
+      - "21"
+      - "990"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["vsftpd", "/etc/vsftpd.conf"]
+
+  redis:
+    build: ./redis
+    container_name: redis
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - inception
+    expose:
+      - "6379"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["redis-server", "/etc/redis.conf"]
+
+  adminer:
+    build: ./adminer
+    container_name: adminer
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - inception
+    expose:
+      - "9000"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["php-fpm82", "-F"]
+
+  website:
+    build: ./website
+    container_name: website
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - inception
+    expose:
+      - "80"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
+
+  mail:
+    build:
+      context: ./mail
+      dockerfile: Dockerfile
+      args:
+        - WP_ADMIN=${WP_ADMIN}
+        - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+        - SMTP_FORWARD=${SMTP_FORWARD}
+    container_name: mail
+    hostname: ${MAILDOMAIN}
+    domainname: ${MAILDOMAIN}
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - inception
+    expose:
+      - "25"
+      - "465"
+      - "587"
+    entrypoint: "/usr/sbin/entrypoint.sh"
+    command: ["postfix", "start-fg"]
 
 networks:
   inception:
     driver: bridge
-
-volumes:
-  mariadb:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${DATADIR}/mariadb
-      o: bind

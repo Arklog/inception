@@ -1,0 +1,17 @@
+FROM alpine:latest
+
+RUN	apk update \
+	&& apk upgrade \
+	&& apk add	vsftpd \
+			ncftp \
+			openrc \
+			tcpdump \
+			syslog-ng \
+			bash
+
+COPY	./conf/vsftpd.conf /etc/vsftpd/vsftpd.conf
+COPY	./conf/entrypoint.sh /usr/sbin/entrypoint.sh
+RUN	chmod +x /usr/sbin/entrypoint.sh
+RUN	mkdir /run/openrc \
+	&& touch /run/openrc/softlevel
+RUN	rc-update add syslog-ng boot
