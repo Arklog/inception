@@ -1,7 +1,7 @@
 COMPOSE_FILE = srcs/docker-compose.yml
 
 all:
-	docker compose --parallel 4 -f ${COMPOSE_FILE} --env-file ./srcs/.env build
+	docker compose --parallel 9 -f ${COMPOSE_FILE} --env-file ./srcs/.env build
 	docker compose -f ${COMPOSE_FILE} --env-file ./srcs/.env up
 
 clean:
