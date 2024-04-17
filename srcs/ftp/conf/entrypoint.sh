@@ -1,8 +1,7 @@
 #!/bin/bash
 
-mkdir -p /var/log/vsftpd
-touch /var/log/vsftpd/vsftpd.log  /var/log/vsftpd/xferlog.log
-tail -f /var/log/vsftpd/vsftpd.log /var/log/vsftpd/xferlog.log >>/dev/stdout &
-chown -R ftp:ftp /var/www/html/wordpress
+chmod 555 /var/www/html/wordpress
+IPADDR="$(ifconfig | grep 'eth0' -A 5 | grep 'inet ' | awk '{print $2}')"
+echo "pasv_address=$IPADDR" >> /etc/vsftpd.conf
 
 exec "$@"
